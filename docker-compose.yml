@@ -1,0 +1,43 @@
+version: "3"
+services:
+ db:
+  image: postgres:14.1-alpine
+  restart: always
+  environment:
+   - POSTGRES_USER=postgres
+   - POSTGRES_PASSWORD=postgres
+   - POSTGRES_DB=realities
+  ports:
+   - 5432:5432
+  volumes:
+   - db:/var/lib/postgresql/data
+ scraping:
+  build: ./reality_scraping
+  environment:
+   - DB_USER=postgres
+   - DB_PORT=5432
+   - DB_HOST=db
+   - DB_PASSWORD=postgres
+   - DB_NAME=realities
+   - LOGGING_LEVEL=DEBUG
+  depends_on:
+   - db
+ web:
+  build: ./web_server
+  environment:
+   - DB_USER=postgres
+   - DB_PORT=5432
+   - DB_HOST=db
+   - DB_PASSWORD=postgres
+   - DB_NAME=realities
+   - SERVER_HOST=web
+   - SERVER_PORT=8080
+   - LOGGING_LEVEL=DEBUG
+  ports:
+   - 8080:8080
+  depends_on:
+   - db
+   - scraping
+volumes:
+ db:
+
